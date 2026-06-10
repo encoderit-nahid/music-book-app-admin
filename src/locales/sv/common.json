@@ -175,6 +175,8 @@
     "file": "Fil",
     "uploadFile": "Ladda upp ljudfil",
     "noFile": "Ingen fil",
+    "processing": "Bearbetar…",
+    "failed": "Konvertering misslyckades",
     "status": "Status",
     "created": "Ljudeffekt skapad",
     "updated": "Ljudeffekt uppdaterad",

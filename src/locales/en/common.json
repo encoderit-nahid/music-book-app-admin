@@ -175,6 +175,8 @@
     "file": "File",
     "uploadFile": "Upload audio file",
     "noFile": "No file",
+    "processing": "Processing…",
+    "failed": "Conversion failed",
     "status": "Status",
     "created": "Sound effect created",
     "updated": "Sound effect updated",

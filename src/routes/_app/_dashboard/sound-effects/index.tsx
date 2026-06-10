@@ -39,7 +39,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { extractApiError } from "@/utils/error";
-import { Plus, Pencil, Trash2, Play, Square, Upload } from "lucide-react";
+import { Plus, Pencil, Trash2, Play, Square, Upload, Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/_app/_dashboard/sound-effects/")({
   component: SoundEffectsPage,
@@ -94,6 +94,10 @@ function SoundEffectsPage() {
   const { data, isLoading } = useQuery({
     queryKey: ["glimra", "sound-effects", search],
     queryFn: () => soundEffectsService.list({ search: search || undefined, per_page: 100 }),
+    // While any clip is still transcoding in the background, poll so the row
+    // flips from "Processing" to a playable file without a manual refresh.
+    refetchInterval: (query) =>
+      query.state.data?.data?.some((se) => se.status === "processing") ? 4000 : false,
   });
 
   const { data: categories } = useQuery({
@@ -157,6 +161,16 @@ function SoundEffectsPage() {
       accessorKey: "file_url",
       header: t("soundEffects.file"),
       cell: ({ row }) => {
+        if (row.original.status === "processing") {
+          return (
+            <span className="flex items-center gap-2 text-muted-foreground text-sm">
+              <Loader2 className="size-4 animate-spin" /> {t("soundEffects.processing")}
+            </span>
+          );
+        }
+        if (row.original.status === "failed") {
+          return <span className="text-destructive text-sm">{t("soundEffects.failed")}</span>;
+        }
         const isPlaying = playingUrl === row.original.file_url;
         return row.original.file_url
           ? <Button variant="ghost" size="icon" onClick={() => togglePlay(row.original.file_url!)}>

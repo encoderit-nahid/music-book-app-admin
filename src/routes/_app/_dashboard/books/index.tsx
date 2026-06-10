@@ -266,7 +266,7 @@ function BooksPage() {
                     <FormItem className="flex-1">
                       <FormLabel>{t("books.ageGroup")}</FormLabel>
                       <Select value={field.value} onValueChange={(v) => field.onChange(v === "none" ? "" : v)}>
-                        <FormControl><SelectTrigger><SelectValue placeholder={t("common.select")} /></SelectTrigger></FormControl>
+                        <FormControl><SelectTrigger className="w-full"><SelectValue placeholder={t("common.select")} /></SelectTrigger></FormControl>
                         <SelectContent>
                           <SelectItem value="none">—</SelectItem>
                           {AGE_GROUPS.map((g) => <SelectItem key={g} value={g}>{g}</SelectItem>)}

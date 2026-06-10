@@ -69,6 +69,7 @@ export interface SoundEffect {
   duration_seconds: number | null;
   category_id: string | null;
   category?: Category | null;
+  status?: "processing" | "ready" | "failed";
   is_active: boolean;
   created_at?: string;
   updated_at?: string;
