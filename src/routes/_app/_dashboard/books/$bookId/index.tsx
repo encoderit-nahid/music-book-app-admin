@@ -87,6 +87,7 @@ const triggerSchema = z.object({
   delay_ms: z.coerce.number().int().min(0).default(0),
   cooldown_ms: z.coerce.number().int().min(0).default(2000),
   repeat_allowed: z.boolean().default(true),
+  is_chapter_end: z.boolean().default(false),
   is_active: z.boolean().default(true),
   variants: z.string().optional(),
 });
@@ -190,6 +191,7 @@ function BookDetailPage() {
       delay_ms: 0,
       cooldown_ms: 2000,
       repeat_allowed: true,
+      is_chapter_end: false,
       is_active: true,
       variants: "",
     },
@@ -245,7 +247,7 @@ function BookDetailPage() {
       match_type: "exact",
       sound_effect_id: "",
       volume: 80, delay_ms: 0, cooldown_ms: 2000,
-      repeat_allowed: true, is_active: true, variants: "",
+      repeat_allowed: true, is_chapter_end: false, is_active: true, variants: "",
     });
     setTriggerDialog(true);
   };
@@ -262,6 +264,7 @@ function BookDetailPage() {
       delay_ms: tr.delay_ms,
       cooldown_ms: tr.cooldown_ms,
       repeat_allowed: tr.repeat_allowed,
+      is_chapter_end: tr.is_chapter_end,
       is_active: tr.is_active,
       variants: Array.isArray(tr.variants) ? tr.variants.join(", ") : "",
     });
@@ -348,7 +351,12 @@ function BookDetailPage() {
   }
 
   const triggerColumns: ColumnDef<TriggerWord>[] = [
-    { accessorKey: "trigger_word", header: t("chapters.triggerWord"), cell: ({ row }) => <span className="font-medium">{row.original.trigger_word}</span> },
+    { accessorKey: "trigger_word", header: t("chapters.triggerWord"), cell: ({ row }) => (
+      <span className="flex items-center gap-2">
+        <span className="font-medium">{row.original.trigger_word}</span>
+        {row.original.is_chapter_end && <Badge variant="secondary">{t("chapters.chapterEndBadge")}</Badge>}
+      </span>
+    ) },
     {
       accessorKey: "match_type",
       header: t("chapters.matchType"),
@@ -542,6 +550,17 @@ function BookDetailPage() {
                       {t("chapters.repeatAllowed")}
                     </label>
                   </FormControl>
+                </FormItem>
+              )} />
+              <FormField control={triggerForm.control} name="is_chapter_end" render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <label className="flex items-center gap-2 text-sm">
+                      <input type="checkbox" checked={field.value} onChange={(e) => field.onChange(e.target.checked)} />
+                      {t("chapters.isChapterEnd")}
+                    </label>
+                  </FormControl>
+                  <p className="text-xs text-muted-foreground">{t("chapters.isChapterEndHint")}</p>
                 </FormItem>
               )} />
               <DialogFooter>

@@ -10,6 +10,7 @@ export interface TriggerWordPayload {
   delay_ms?: number;
   cooldown_ms?: number;
   repeat_allowed?: boolean;
+  is_chapter_end?: boolean;
   is_active?: boolean;
 }
 
