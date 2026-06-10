@@ -12,7 +12,7 @@ export interface BookFilters {
 
 export interface BookPayload {
   title: string;
-  category_id?: string | null;
+  category_ids?: string[] | null;
   subtitle?: string | null;
   author?: string | null;
   description?: string | null;
@@ -29,7 +29,8 @@ function toFormData(data: Partial<BookPayload>, method?: "PUT") {
   if (method) fd.append("_method", method);
   Object.entries(data).forEach(([key, value]) => {
     if (value === undefined || value === null) return;
-    if (value instanceof File) fd.append(key, value);
+    if (Array.isArray(value)) value.forEach((v) => fd.append(`${key}[]`, String(v)));
+    else if (value instanceof File) fd.append(key, value);
     else if (typeof value === "boolean") fd.append(key, value ? "1" : "0");
     else fd.append(key, String(value));
   });

@@ -13,8 +13,16 @@ import AppTable from "@/components/app-table";
 import { PageHeader } from "@/components/glimra/page-header";
 import { ConfirmDelete } from "@/components/glimra/confirm-delete";
 import { soundEffectsService } from "@/services/glimra/sound-effects";
+import { categoriesService } from "@/services/glimra/categories";
 import type { SoundEffect } from "@/types/glimra";
 import type { ColumnDef } from "@tanstack/react-table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -39,7 +47,7 @@ export const Route = createFileRoute("/_app/_dashboard/sound-effects/")({
 
 const schema = z.object({
   name: z.string().min(1, "Name is required").max(255),
-  category: z.string().max(100).optional(),
+  category_id: z.string().optional(),
   is_active: z.boolean(),
 });
 
@@ -88,22 +96,27 @@ function SoundEffectsPage() {
     queryFn: () => soundEffectsService.list({ search: search || undefined, per_page: 100 }),
   });
 
+  const { data: categories } = useQuery({
+    queryKey: ["glimra", "categories", "all"],
+    queryFn: () => categoriesService.list({ per_page: 100 }),
+  });
+
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { name: "", category: "", is_active: true },
+    defaultValues: { name: "", category_id: "", is_active: true },
   });
 
   const openCreate = () => {
     setEditing(null);
     setAudioFile(null);
-    form.reset({ name: "", category: "", is_active: true });
+    form.reset({ name: "", category_id: "", is_active: true });
     setDialogOpen(true);
   };
 
   const openEdit = (se: SoundEffect) => {
     setEditing(se);
     setAudioFile(null);
-    form.reset({ name: se.name, category: se.category ?? "", is_active: se.is_active });
+    form.reset({ name: se.name, category_id: se.category_id ?? "", is_active: se.is_active });
     setDialogOpen(true);
   };
 
@@ -134,7 +147,7 @@ function SoundEffectsPage() {
 
   const columns: ColumnDef<SoundEffect>[] = [
     { accessorKey: "name", header: t("soundEffects.name"), cell: ({ row }) => <span className="font-medium">{row.original.name}</span> },
-    { accessorKey: "category", header: t("soundEffects.category"), cell: ({ row }) => row.original.category ?? "—" },
+    { accessorKey: "category", header: t("soundEffects.category"), cell: ({ row }) => row.original.category?.name ?? "—" },
     {
       accessorKey: "duration_seconds",
       header: t("soundEffects.duration"),
@@ -219,11 +232,17 @@ function SoundEffectsPage() {
               />
               <FormField
                 control={form.control}
-                name="category"
+                name="category_id"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>{t("soundEffects.category")}</FormLabel>
-                    <FormControl><Input {...field} /></FormControl>
+                    <Select value={field.value || "none"} onValueChange={(v) => field.onChange(v === "none" ? "" : v)}>
+                      <FormControl><SelectTrigger className="w-full"><SelectValue placeholder={t("common.select")} /></SelectTrigger></FormControl>
+                      <SelectContent>
+                        <SelectItem value="none">—</SelectItem>
+                        {(categories?.data ?? []).map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}

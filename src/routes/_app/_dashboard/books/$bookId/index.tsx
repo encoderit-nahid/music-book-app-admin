@@ -15,8 +15,10 @@ import { booksService } from "@/services/glimra/books";
 import { chaptersService } from "@/services/glimra/chapters";
 import { triggerWordsService } from "@/services/glimra/trigger-words";
 import { soundEffectsService } from "@/services/glimra/sound-effects";
+import { categoriesService } from "@/services/glimra/categories";
 import type { Chapter, TriggerWord } from "@/types/glimra";
 import type { ColumnDef } from "@tanstack/react-table";
+import { SearchableSelect } from "@/components/shared/searchable-select";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import {
   DndContext,
@@ -104,6 +106,7 @@ function BookDetailPage() {
   const [triggerDialog, setTriggerDialog] = useState(false);
   const [editingTrigger, setEditingTrigger] = useState<TriggerWord | null>(null);
   const [toDeleteTrigger, setToDeleteTrigger] = useState<TriggerWord | null>(null);
+  const [soundCategory, setSoundCategory] = useState("");
   const [chaptersOrder, setChaptersOrder] = useState<string[]>([]);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
 
@@ -164,6 +167,13 @@ function BookDetailPage() {
     queryKey: ["glimra", "sound-effects", "all"],
     queryFn: () => soundEffectsService.list({ per_page: 100 }),
   });
+
+  const { data: categories } = useQuery({
+    queryKey: ["glimra", "categories", "all"],
+    queryFn: () => categoriesService.list({ per_page: 100 }),
+  });
+
+  const bookCategoryId = book?.data.categories?.[0]?.id ?? "";
 
   const chapterForm = useForm<ChapterForm>({
     resolver: zodResolver(chapterSchema) as any,
@@ -229,6 +239,7 @@ function BookDetailPage() {
 
   const openTriggerCreate = () => {
     setEditingTrigger(null);
+    setSoundCategory(bookCategoryId);
     triggerForm.reset({
       trigger_word: "",
       match_type: "exact",
@@ -241,6 +252,8 @@ function BookDetailPage() {
 
   const openTriggerEdit = (tr: TriggerWord) => {
     setEditingTrigger(tr);
+    const soundCat = soundEffects?.data.find((se) => se.id === tr.sound_effect_id)?.category_id;
+    setSoundCategory(soundCat ?? bookCategoryId);
     triggerForm.reset({
       trigger_word: tr.trigger_word,
       match_type: tr.match_type,
@@ -390,7 +403,7 @@ function BookDetailPage() {
             }
             <div>
               <h1 className="text-2xl font-bold">{b?.title}</h1>
-              <p className="text-sm text-muted-foreground">{b?.author} · {b?.category?.name} · {b?.age_group ?? t("common.allAges")}</p>
+              <p className="text-sm text-muted-foreground">{b?.author} · {b?.categories?.map((c) => c.name).join(", ") || "—"} · {b?.age_group ?? t("common.allAges")}</p>
             </div>
           </div>
         </div>
@@ -475,18 +488,38 @@ function BookDetailPage() {
                   </FormItem>
                 )} />
               </div>
-              <FormField control={triggerForm.control} name="sound_effect_id" render={({ field }) => (
-                <FormItem><FormLabel>{t("chapters.soundEffect")}</FormLabel>
-                    <Select value={field.value} onValueChange={(v) => field.onChange(v === "none" ? "" : v)}>
-                      <FormControl><SelectTrigger><SelectValue placeholder={t("common.select")} /></SelectTrigger></FormControl>
+              <div className="flex gap-4">
+                <FormItem className="w-44">
+                  <FormLabel>{t("chapters.soundCategory")}</FormLabel>
+                  <Select value={soundCategory || "all"} onValueChange={(v) => setSoundCategory(v === "all" ? "" : v)}>
+                    <SelectTrigger className="w-full"><SelectValue placeholder={t("books.allCategories")} /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="none">—</SelectItem>
-                      {(soundEffects?.data ?? []).map((se) => <SelectItem key={se.id} value={se.id}>{se.name}</SelectItem>)}
+                      <SelectItem value="all">{t("books.allCategories")}</SelectItem>
+                      {(categories?.data ?? []).map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
                     </SelectContent>
                   </Select>
-                  <FormMessage />
                 </FormItem>
-              )} />
+                <FormField control={triggerForm.control} name="sound_effect_id" render={({ field }) => (
+                  <FormItem className="flex-1"><FormLabel>{t("chapters.soundEffect")}</FormLabel>
+                    <FormControl>
+                      <SearchableSelect
+                        className="w-full"
+                        value={field.value}
+                        onChange={(v) => field.onChange(v === "none" ? "" : String(v))}
+                        placeholder={t("common.select")}
+                        emptyMessage={t("common.noResults")}
+                        options={[
+                          { value: "none", label: "—" },
+                          ...(soundEffects?.data ?? [])
+                            .filter((se) => !soundCategory || se.category_id === soundCategory)
+                            .map((se) => ({ value: se.id, label: se.name })),
+                        ]}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+              </div>
               <div className="flex gap-4">
                 <FormField control={triggerForm.control} name="volume" render={({ field }) => (
                   <FormItem className="flex-1"><FormLabel>{t("chapters.volume")}</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>

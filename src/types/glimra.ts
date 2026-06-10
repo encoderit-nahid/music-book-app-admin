@@ -29,8 +29,8 @@ export interface Category {
 
 export interface Book {
   id: string;
-  category_id: string | null;
-  category?: Category | null;
+  categories?: Category[];
+  category_ids?: string[];
   title: string;
   slug: string;
   subtitle: string | null;
@@ -67,7 +67,8 @@ export interface SoundEffect {
   file_path: string | null;
   file_url: string | null;
   duration_seconds: number | null;
-  category: string | null;
+  category_id: string | null;
+  category?: Category | null;
   is_active: boolean;
   created_at?: string;
   updated_at?: string;

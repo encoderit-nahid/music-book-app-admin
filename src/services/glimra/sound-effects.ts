@@ -10,7 +10,7 @@ export interface SoundEffectFilters {
 
 export interface SoundEffectPayload {
   name: string;
-  category?: string | null;
+  category_id?: string | null;
   duration_seconds?: number | null;
   is_active?: boolean;
   file?: File | null;
