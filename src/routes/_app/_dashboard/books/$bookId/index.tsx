@@ -10,7 +10,6 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import AppTable from "@/components/app-table";
-import { PageHeader } from "@/components/glimra/page-header";
 import { ConfirmDelete } from "@/components/glimra/confirm-delete";
 import { booksService } from "@/services/glimra/books";
 import { chaptersService } from "@/services/glimra/chapters";
