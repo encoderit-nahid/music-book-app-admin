@@ -57,6 +57,7 @@ function SoundEffectsPage() {
   const { t } = useTranslation();
   const qc = useQueryClient();
   const [search, setSearch] = useState("");
+  const [category, setCategory] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<SoundEffect | null>(null);
   const [toDelete, setToDelete] = useState<SoundEffect | null>(null);
@@ -92,8 +93,8 @@ function SoundEffectsPage() {
   };
 
   const { data, isLoading } = useQuery({
-    queryKey: ["glimra", "sound-effects", search],
-    queryFn: () => soundEffectsService.list({ search: search || undefined, per_page: 100 }),
+    queryKey: ["glimra", "sound-effects", search, category],
+    queryFn: () => soundEffectsService.list({ search: search || undefined, category: category || undefined, per_page: 100 }),
     // While any clip is still transcoding in the background, poll so the row
     // flips from "Processing" to a playable file without a manual refresh.
     refetchInterval: (query) =>
@@ -216,8 +217,24 @@ function SoundEffectsPage() {
         }
       />
 
-      <div className="mb-4 max-w-xs">
-        <Input placeholder={t("soundEffects.searchPlaceholder")} value={search} onChange={(e) => setSearch(e.target.value)} />
+      <div className="mb-4 flex flex-wrap items-center gap-3">
+        <Input
+          className="max-w-xs"
+          placeholder={t("soundEffects.searchPlaceholder")}
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+        <Select value={category || "all"} onValueChange={(v) => setCategory(v === "all" ? "" : v)}>
+          <SelectTrigger className="w-48">
+            <SelectValue placeholder={t("books.allCategories")} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">{t("books.allCategories")}</SelectItem>
+            {(categories?.data ?? []).map((c) => (
+              <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <AppTable

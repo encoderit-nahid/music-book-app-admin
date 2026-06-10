@@ -103,6 +103,8 @@
     "description": "Manage your library of interactive storybooks.",
     "searchPlaceholder": "Search books…",
     "allCategories": "All categories",
+    "authorPlaceholder": "Filter by author…",
+    "allStatuses": "All statuses",
     "selectCategories": "Select categories…",
     "newBook": "New book",
     "editBook": "Edit book",

@@ -103,6 +103,8 @@
     "description": "Hantera ditt bibliotek med interaktiva böcker.",
     "searchPlaceholder": "Sök böcker…",
     "allCategories": "Alla kategorier",
+    "authorPlaceholder": "Filtrera på författare…",
+    "allStatuses": "Alla statusar",
     "selectCategories": "Välj kategorier…",
     "newBook": "Ny bok",
     "editBook": "Redigera bok",

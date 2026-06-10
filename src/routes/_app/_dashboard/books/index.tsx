@@ -65,7 +65,9 @@ function BooksPage() {
   const { t } = useTranslation();
   const qc = useQueryClient();
   const [search, setSearch] = useState("");
+  const [author, setAuthor] = useState("");
   const [category, setCategory] = useState("");
+  const [status, setStatus] = useState("all");
   const [page, setPage] = useState(1);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Book | null>(null);
@@ -73,8 +75,15 @@ function BooksPage() {
   const [coverFile, setCoverFile] = useState<File | null>(null);
 
   const { data, isLoading } = useQuery({
-    queryKey: ["glimra", "books", search, category, page],
-    queryFn: () => booksService.list({ search: search || undefined, category: category || undefined, page, per_page: 20 }),
+    queryKey: ["glimra", "books", search, author, category, status, page],
+    queryFn: () => booksService.list({
+      search: search || undefined,
+      author: author || undefined,
+      category: category || undefined,
+      status: status === "all" ? undefined : status === "active",
+      page,
+      per_page: 20,
+    }),
   });
 
   const { data: categories } = useQuery({
@@ -207,6 +216,12 @@ function BooksPage() {
           value={search}
           onChange={(e) => { setSearch(e.target.value); setPage(1); }}
         />
+        <Input
+          className="w-48"
+          placeholder={t("books.authorPlaceholder")}
+          value={author}
+          onChange={(e) => { setAuthor(e.target.value); setPage(1); }}
+        />
         <Select
           value={category || "all"}
           onValueChange={(v) => { setCategory(v === "all" ? "" : v); setPage(1); }}
@@ -219,6 +234,16 @@ function BooksPage() {
             {(categories?.data ?? []).map((c) => (
               <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
             ))}
+          </SelectContent>
+        </Select>
+        <Select value={status} onValueChange={(v) => { setStatus(v); setPage(1); }}>
+          <SelectTrigger className="w-40">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">{t("books.allStatuses")}</SelectItem>
+            <SelectItem value="active">{t("common.active")}</SelectItem>
+            <SelectItem value="inactive">{t("common.inactive")}</SelectItem>
           </SelectContent>
         </Select>
       </div>

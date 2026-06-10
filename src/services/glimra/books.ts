@@ -3,6 +3,7 @@ import type { Book, Paginated, Single } from "@/types/glimra";
 
 export interface BookFilters {
   search?: string;
+  author?: string;
   category?: string;
   age_group?: string;
   status?: boolean;
