@@ -35,7 +35,7 @@ function RouteComponent() {
 
   return (
     <SidebarProvider>
-      <div className="flex h-svw w-full overflow-hidden">
+      <div className="flex h-svh w-full overflow-hidden">
         <div className="max-w-full">
           <AppSidebar />
         </div>
