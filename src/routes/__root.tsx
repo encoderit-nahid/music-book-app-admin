@@ -26,7 +26,7 @@ function NotFoundPage() {
     if (location.pathname === '/auth/reset-password') {
       navigate({
         to: '/reset-password',
-        search: Object.fromEntries(new URLSearchParams(location.search).entries()) as Record<string, string>,
+        search: Object.fromEntries(new URLSearchParams(location.search).entries()) as { token: string; email: string },
         replace: true,
       });
     }
