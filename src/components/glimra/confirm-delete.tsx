@@ -16,6 +16,9 @@ type Props = {
   description?: string;
   onConfirm: () => void;
   loading?: boolean;
+  cancelLabel?: string;
+  confirmLabel?: string;
+  confirmLoadingLabel?: string;
 };
 
 export function ConfirmDelete({
@@ -25,6 +28,9 @@ export function ConfirmDelete({
   description = "This action cannot be undone.",
   onConfirm,
   loading,
+  cancelLabel = "Cancel",
+  confirmLabel = "Delete",
+  confirmLoadingLabel = "Deleting\u2026",
 }: Props) {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
@@ -34,7 +40,7 @@ export function ConfirmDelete({
           <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
+          <AlertDialogCancel disabled={loading}>{cancelLabel}</AlertDialogCancel>
           <AlertDialogAction
             onClick={(e) => {
               e.preventDefault();
@@ -42,7 +48,7 @@ export function ConfirmDelete({
             }}
             className="bg-destructive text-white hover:bg-destructive/90"
           >
-            {loading ? "Deleting…" : "Delete"}
+            {loading ? confirmLoadingLabel : confirmLabel}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

@@ -1,4 +1,3 @@
-export { StatusBadge } from "./status-badge";
 export { StatusPill, type PillStatus } from "./status-pill";
 export { RowActions } from "./row-actions";
 export { ListPagination } from "./list-pagination";

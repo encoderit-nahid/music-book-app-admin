@@ -50,7 +50,7 @@ function ForbiddenPage() {
 
       <div className="absolute bottom-8 z-10 flex items-center gap-2 text-xs text-white/20">
         <div className="size-1 rounded-full bg-white/20" />
-        <span>Barber Shop</span>
+        <span>Glimra F\u00f6rlag</span>
         <div className="size-1 rounded-full bg-white/20" />
       </div>
     </div>

@@ -15,41 +15,45 @@ export const useMarkNotificationAsRead = () => {
   return useMutation({
     mutationKey: ["mark-notification-as-read"],
     mutationFn: async (notificationId: string): Promise<MarkAsReadResponse> => {
-      const response = await api.get<MarkAsReadResponse>(
+      const response = await api.put<MarkAsReadResponse>(
         `/notifications/mark-as-read/${notificationId}`
       );
-      return response.data as MarkAsReadResponse;
+      return response.data;
     },
     onSuccess: async (_data, notificationId) => {
       try {
-        // Update all cached "notifications" queries in-place to mark the specific notification as read
         const queries = queryClient.getQueriesData<NotificationResponse>({ queryKey: ["notifications"] });
         queries.forEach(([queryKey, cached]) => {
           if (!cached) return;
 
-          // Shallow clone the cached value to avoid mutating react-query internals
-          const next = JSON.parse(JSON.stringify(cached)) as NotificationResponse;
+          queryClient.setQueryData<NotificationResponse>(queryKey, (prev) => {
+            if (!prev) return prev;
 
-          let changed = false;
-          const list = next.data.notifications.data;
-          for (let i = 0; i < list.length; i++) {
-            const n = list[i];
-            if (n.id === notificationId && !n.read_at) {
-              n.read_at = new Date().toISOString();
-              changed = true;
-            }
-          }
+            let changed = false;
+            const list = prev.data.notifications.data.map((n) => {
+              if (n.id === notificationId && !n.read_at) {
+                changed = true;
+                return { ...n, read_at: new Date().toISOString() };
+              }
+              return n;
+            });
 
-          if (changed) {
-            // decrease unread_count safely
-            next.data.unread_count = Math.max(0, (next.data.unread_count || 0) - 1);
+            if (!changed) return prev;
 
-            // update the cache for this specific query key
-            queryClient.setQueryData(queryKey, next);
-          }
+            return {
+              ...prev,
+              data: {
+                ...prev.data,
+                notifications: {
+                  ...prev.data.notifications,
+                  data: list,
+                },
+                unread_count: Math.max(0, (prev.data.unread_count || 0) - 1),
+              },
+            };
+          });
         });
       } catch (err) {
-        // If anything goes wrong updating the cache, as a fallback invalidate the notifications queries
         await queryClient.refetchQueries({ queryKey: ["notifications"] });
       }
     },

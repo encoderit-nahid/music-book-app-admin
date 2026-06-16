@@ -1,4 +1,3 @@
-"use client";
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -63,7 +62,6 @@ export default function AppDateRangePicker({
           selected={dateRange}
           onSelect={(range) => {
             onChangeValue(range || { from: undefined, to: undefined });
-            console.log("🚀 ~ range:", range);
           }}
           captionLayout="dropdown"
           numberOfMonths={1}

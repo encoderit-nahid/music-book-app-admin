@@ -12,19 +12,6 @@ export const SUPPORTED_LANGUAGES = [
 
 export type LanguageCode = (typeof SUPPORTED_LANGUAGES)[number]["code"];
 
-function buildResources(data: any) {
-  return {
-    common: data,
-    page: data.page,
-    weekday: data.weekday,
-    nav: data.nav,
-    breadcrumbs: data.breadcrumbs,
-    topbar: data.topbar,
-    status: data.status,
-    brand: data.brand,
-  };
-}
-
 i18n
   .use(LanguageDetector)
   .use(initReactI18next)
@@ -32,11 +19,10 @@ i18n
     fallbackLng: "en",
     supportedLngs: SUPPORTED_LANGUAGES.map((l) => l.code),
     resources: {
-      en: buildResources(en),
-      sv: buildResources(sv),
+      en: { common: en },
+      sv: { common: sv },
     },
     defaultNS: "common",
-    fallbackNS: "common",
     interpolation: { escapeValue: false },
     detection: {
       order: ["localStorage", "navigator"],

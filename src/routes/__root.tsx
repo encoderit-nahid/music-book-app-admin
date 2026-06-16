@@ -26,12 +26,11 @@ function NotFoundPage() {
     if (location.pathname === '/auth/reset-password') {
       navigate({
         to: '/reset-password',
-        search: Object.fromEntries(new URLSearchParams(location.search).entries()) as { token: string; email: string },
+        search: Object.fromEntries(new URLSearchParams(location.search).entries()) as Record<string, string>,
         replace: true,
       });
     }
   }, [location.pathname, location.search, navigate]);
-
   return (
     <div className="relative flex min-h-svh flex-col items-center justify-center overflow-hidden bg-[#0A0A0A] px-4">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(252,1,0,0.08)_0%,_transparent_60%)]" />
@@ -72,7 +71,7 @@ function NotFoundPage() {
 
       <div className="absolute bottom-8 z-10 flex items-center gap-2 text-xs text-white/20">
         <div className="size-1 rounded-full bg-white/20" />
-        <span>Barber Shop</span>
+        <span>Glimra Förlag</span>
         <div className="size-1 rounded-full bg-white/20" />
       </div>
     </div>

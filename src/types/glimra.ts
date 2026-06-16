@@ -54,6 +54,7 @@ export interface Book {
   duration_minutes: number | null;
   is_active: boolean;
   published_at: string | null;
+  is_favorited?: boolean;
   chapters?: Chapter[];
   created_at?: string;
   updated_at?: string;
@@ -80,7 +81,7 @@ export interface SoundEffect {
   duration_seconds: number | null;
   category_id: string | null;
   category?: Category | null;
-  status?: "processing" | "ready" | "failed";
+  status: "processing" | "ready" | "failed";
   is_active: boolean;
   created_at?: string;
   updated_at?: string;
@@ -107,11 +108,16 @@ export interface AppUser {
   name: string;
   email: string;
   avatar: string | null;
+  date_of_birth: string | null;
   language: string;
+  master_volume: number | null;
+  sfx_enabled: boolean;
+  mic_enabled: boolean;
+  theme: string | null;
   is_active: boolean;
   role: string | null;
-  progress_count?: number;
-  favorites_count?: number;
+  roles: string[];
+  permissions?: Record<string, boolean>;
   created_at?: string;
 }
 
