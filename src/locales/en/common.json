@@ -5,6 +5,7 @@
   },
   "nav": {
     "dashboard": "Dashboard",
+    "homeSlides": "Home Slider",
     "categories": "Categories",
     "books": "Books",
     "soundEffects": "Sound Effects",
@@ -74,6 +75,25 @@
     "readingMinutes": "Reading Time (min)",
     "popularBooks": "Popular Books",
     "progressOverTime": "Progress Over Time"
+  },
+  "homeSlides": {
+    "title": "Home Slider",
+    "description": "Manage the slides shown on the app home screen.",
+    "searchPlaceholder": "Search slides…",
+    "allStatuses": "All statuses",
+    "newSlide": "New slide",
+    "editSlide": "Edit slide",
+    "titleLabel": "Title",
+    "descriptionLabel": "Description",
+    "image": "Image",
+    "uploadImage": "Upload image",
+    "deleteTitle": "Delete slide?",
+    "deleteDescription": "\"{{name}}\" will be removed from the home slider.",
+    "created": "Slide created",
+    "updated": "Slide updated",
+    "deleted": "Slide deleted",
+    "reordered": "Slides reordered",
+    "failedToSave": "Could not save slide"
   },
   "categories": {
     "title": "Categories",

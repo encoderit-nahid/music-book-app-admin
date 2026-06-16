@@ -5,6 +5,7 @@
   },
   "nav": {
     "dashboard": "Dashboard",
+    "homeSlides": "Startbildspel",
     "categories": "Kategorier",
     "books": "Böcker",
     "soundEffects": "Ljudeffekter",
@@ -74,6 +75,25 @@
     "readingMinutes": "Lästid (min)",
     "popularBooks": "Populära böcker",
     "progressOverTime": "Framsteg över tid"
+  },
+  "homeSlides": {
+    "title": "Startbildspel",
+    "description": "Hantera bilderna som visas på appens startskärm.",
+    "searchPlaceholder": "Sök bilder…",
+    "allStatuses": "Alla statusar",
+    "newSlide": "Ny bild",
+    "editSlide": "Redigera bild",
+    "titleLabel": "Titel",
+    "descriptionLabel": "Beskrivning",
+    "image": "Bild",
+    "uploadImage": "Ladda upp bild",
+    "deleteTitle": "Ta bort bild?",
+    "deleteDescription": "\"{{name}}\" tas bort från startbildspelet.",
+    "created": "Bild skapad",
+    "updated": "Bild uppdaterad",
+    "deleted": "Bild borttagen",
+    "reordered": "Bilder omordnade",
+    "failedToSave": "Kunde inte spara bild"
   },
   "categories": {
     "title": "Kategorier",

@@ -23,6 +23,7 @@ import {
   Settings,
   Shield,
   Layers,
+  GalleryHorizontal,
 } from "lucide-react";
 
 export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
@@ -52,6 +53,13 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
       url: "/",
       icon: LayoutDashboard,
       isActive: isActiveLink(["/"]),
+      isVisible: true,
+    },
+    {
+      name: t("nav.homeSlides"),
+      url: "/home-slides",
+      icon: GalleryHorizontal,
+      isActive: isActiveLink(["/home-slides"]),
       isVisible: true,
     },
     {

@@ -27,6 +27,17 @@ export interface Category {
   updated_at?: string;
 }
 
+export interface HomeSlide {
+  id: string;
+  title: string;
+  description: string | null;
+  image: string | null;
+  sort_order: number;
+  is_active: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export interface Book {
   id: string;
   categories?: Category[];

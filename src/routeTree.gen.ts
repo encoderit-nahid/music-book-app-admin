@@ -19,6 +19,7 @@ import { Route as AppDashboardIndexRouteImport } from './routes/_app/_dashboard/
 import { Route as AppDashboardStaffIndexRouteImport } from './routes/_app/_dashboard/staff/index'
 import { Route as AppDashboardSoundEffectsIndexRouteImport } from './routes/_app/_dashboard/sound-effects/index'
 import { Route as AppDashboardSettingsIndexRouteImport } from './routes/_app/_dashboard/settings/index'
+import { Route as AppDashboardHomeSlidesIndexRouteImport } from './routes/_app/_dashboard/home-slides/index'
 import { Route as AppDashboardCategoriesIndexRouteImport } from './routes/_app/_dashboard/categories/index'
 import { Route as AppDashboardBooksIndexRouteImport } from './routes/_app/_dashboard/books/index'
 import { Route as AppDashboardAppUsersIndexRouteImport } from './routes/_app/_dashboard/app-users/index'
@@ -74,6 +75,12 @@ const AppDashboardSettingsIndexRoute =
     path: '/settings/',
     getParentRoute: () => AppRouteRoute,
   } as any)
+const AppDashboardHomeSlidesIndexRoute =
+  AppDashboardHomeSlidesIndexRouteImport.update({
+    id: '/_dashboard/home-slides/',
+    path: '/home-slides/',
+    getParentRoute: () => AppRouteRoute,
+  } as any)
 const AppDashboardCategoriesIndexRoute =
   AppDashboardCategoriesIndexRouteImport.update({
     id: '/_dashboard/categories/',
@@ -107,6 +114,7 @@ export interface FileRoutesByFullPath {
   '/app-users': typeof AppDashboardAppUsersIndexRoute
   '/books': typeof AppDashboardBooksIndexRoute
   '/categories': typeof AppDashboardCategoriesIndexRoute
+  '/home-slides': typeof AppDashboardHomeSlidesIndexRoute
   '/settings': typeof AppDashboardSettingsIndexRoute
   '/sound-effects': typeof AppDashboardSoundEffectsIndexRoute
   '/staff': typeof AppDashboardStaffIndexRoute
@@ -121,6 +129,7 @@ export interface FileRoutesByTo {
   '/app-users': typeof AppDashboardAppUsersIndexRoute
   '/books': typeof AppDashboardBooksIndexRoute
   '/categories': typeof AppDashboardCategoriesIndexRoute
+  '/home-slides': typeof AppDashboardHomeSlidesIndexRoute
   '/settings': typeof AppDashboardSettingsIndexRoute
   '/sound-effects': typeof AppDashboardSoundEffectsIndexRoute
   '/staff': typeof AppDashboardStaffIndexRoute
@@ -138,6 +147,7 @@ export interface FileRoutesById {
   '/_app/_dashboard/app-users/': typeof AppDashboardAppUsersIndexRoute
   '/_app/_dashboard/books/': typeof AppDashboardBooksIndexRoute
   '/_app/_dashboard/categories/': typeof AppDashboardCategoriesIndexRoute
+  '/_app/_dashboard/home-slides/': typeof AppDashboardHomeSlidesIndexRoute
   '/_app/_dashboard/settings/': typeof AppDashboardSettingsIndexRoute
   '/_app/_dashboard/sound-effects/': typeof AppDashboardSoundEffectsIndexRoute
   '/_app/_dashboard/staff/': typeof AppDashboardStaffIndexRoute
@@ -154,6 +164,7 @@ export interface FileRouteTypes {
     | '/app-users'
     | '/books'
     | '/categories'
+    | '/home-slides'
     | '/settings'
     | '/sound-effects'
     | '/staff'
@@ -168,6 +179,7 @@ export interface FileRouteTypes {
     | '/app-users'
     | '/books'
     | '/categories'
+    | '/home-slides'
     | '/settings'
     | '/sound-effects'
     | '/staff'
@@ -184,6 +196,7 @@ export interface FileRouteTypes {
     | '/_app/_dashboard/app-users/'
     | '/_app/_dashboard/books/'
     | '/_app/_dashboard/categories/'
+    | '/_app/_dashboard/home-slides/'
     | '/_app/_dashboard/settings/'
     | '/_app/_dashboard/sound-effects/'
     | '/_app/_dashboard/staff/'
@@ -268,6 +281,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppDashboardSettingsIndexRouteImport
       parentRoute: typeof AppRouteRoute
     }
+    '/_app/_dashboard/home-slides/': {
+      id: '/_app/_dashboard/home-slides/'
+      path: '/home-slides'
+      fullPath: '/home-slides'
+      preLoaderRoute: typeof AppDashboardHomeSlidesIndexRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
     '/_app/_dashboard/categories/': {
       id: '/_app/_dashboard/categories/'
       path: '/categories'
@@ -304,6 +324,7 @@ interface AppRouteRouteChildren {
   AppDashboardAppUsersIndexRoute: typeof AppDashboardAppUsersIndexRoute
   AppDashboardBooksIndexRoute: typeof AppDashboardBooksIndexRoute
   AppDashboardCategoriesIndexRoute: typeof AppDashboardCategoriesIndexRoute
+  AppDashboardHomeSlidesIndexRoute: typeof AppDashboardHomeSlidesIndexRoute
   AppDashboardSettingsIndexRoute: typeof AppDashboardSettingsIndexRoute
   AppDashboardSoundEffectsIndexRoute: typeof AppDashboardSoundEffectsIndexRoute
   AppDashboardStaffIndexRoute: typeof AppDashboardStaffIndexRoute
@@ -315,6 +336,7 @@ const AppRouteRouteChildren: AppRouteRouteChildren = {
   AppDashboardAppUsersIndexRoute: AppDashboardAppUsersIndexRoute,
   AppDashboardBooksIndexRoute: AppDashboardBooksIndexRoute,
   AppDashboardCategoriesIndexRoute: AppDashboardCategoriesIndexRoute,
+  AppDashboardHomeSlidesIndexRoute: AppDashboardHomeSlidesIndexRoute,
   AppDashboardSettingsIndexRoute: AppDashboardSettingsIndexRoute,
   AppDashboardSoundEffectsIndexRoute: AppDashboardSoundEffectsIndexRoute,
   AppDashboardStaffIndexRoute: AppDashboardStaffIndexRoute,
