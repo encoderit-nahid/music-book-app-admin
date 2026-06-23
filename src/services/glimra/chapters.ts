@@ -5,6 +5,7 @@ export interface ChapterPayload {
   title: string;
   chapter_number: number;
   content?: string | null;
+  background_sound_id?: string | null;
 }
 
 interface ReorderPayload {

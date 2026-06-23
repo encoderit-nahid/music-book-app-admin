@@ -60,6 +60,14 @@ export interface Book {
   updated_at?: string;
 }
 
+export interface Tag {
+  id: string;
+  name: string;
+  type: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export interface Chapter {
   id: string;
   book_id: string;
@@ -67,6 +75,8 @@ export interface Chapter {
   chapter_number: number;
   sort_order: number;
   content?: string | null;
+  background_sound_id?: string | null;
+  background_sound?: SoundEffect | null;
   trigger_word_mappings?: TriggerWord[];
   triggers_count?: number;
   created_at?: string;
@@ -81,6 +91,10 @@ export interface SoundEffect {
   duration_seconds: number | null;
   category_id: string | null;
   category?: Category | null;
+  type: "one-shot" | "ambient-loop";
+  fade_in_ms: number;
+  fade_out_ms: number;
+  tags?: Tag[];
   status: "processing" | "ready" | "failed";
   is_active: boolean;
   created_at?: string;
@@ -92,7 +106,7 @@ export interface TriggerWord {
   chapter_id: string;
   trigger_word: string;
   variants: string[];
-  match_type: "exact" | "contains" | "phonetic";
+  match_type: "exact" | "contains";
   sound_effect_id: string | null;
   sound_effect?: SoundEffect | null;
   volume: number;

@@ -77,11 +77,12 @@ const chapterSchema = z.object({
   title: z.string().min(1, "Title is required").max(255),
   chapter_number: z.coerce.number().int().min(1),
   content: z.string().optional(),
+  background_sound_id: z.string().optional(),
 });
 
 const triggerSchema = z.object({
   trigger_word: z.string().min(1, "Word is required"),
-  match_type: z.enum(["exact", "contains", "phonetic"]).default("exact"),
+  match_type: z.enum(["exact", "contains"]).default("exact"),
   sound_effect_id: z.string().optional(),
   volume: z.coerce.number().min(0).max(100).default(80),
   delay_ms: z.coerce.number().int().min(0).default(0),
@@ -178,7 +179,7 @@ function BookDetailPage() {
 
   const chapterForm = useForm<ChapterForm>({
     resolver: zodResolver(chapterSchema) as any,
-    defaultValues: { title: "", chapter_number: 1, content: "" },
+    defaultValues: { title: "", chapter_number: 1, content: "", background_sound_id: "_none" },
   });
 
   const triggerForm = useForm<TriggerForm>({
@@ -199,7 +200,7 @@ function BookDetailPage() {
 
   const openChapterCreate = () => {
     setEditingChapter(null);
-    chapterForm.reset({ title: "", chapter_number: (chapters?.data?.length ?? 0) + 1, content: "" });
+    chapterForm.reset({ title: "", chapter_number: (chapters?.data?.length ?? 0) + 1, content: "", background_sound_id: "_none" });
     setChapterDialog(true);
   };
 
@@ -209,15 +210,20 @@ function BookDetailPage() {
       title: ch.title,
       chapter_number: ch.chapter_number,
       content: ch.content ?? "",
+      background_sound_id: ch.background_sound_id ?? "_none",
     });
     setChapterDialog(true);
   };
 
   const saveChapter = useMutation({
     mutationFn: (values: ChapterForm) => {
+      const payload = {
+        ...values,
+        background_sound_id: values.background_sound_id === "_none" ? null : values.background_sound_id,
+      };
       return editingChapter
-        ? chaptersService.update(editingChapter.id, values)
-        : chaptersService.create(bookId, values);
+        ? chaptersService.update(editingChapter.id, payload)
+        : chaptersService.create(bookId, payload);
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["glimra", "chapters", bookId] });
@@ -464,6 +470,18 @@ function BookDetailPage() {
               <FormField control={chapterForm.control} name="content" render={({ field }) => (
                 <FormItem><FormLabel>{t("chapters.content")}</FormLabel><FormControl><Textarea rows={4} {...field} /></FormControl><FormMessage /></FormItem>
               )} />
+              <FormField control={chapterForm.control} name="background_sound_id" render={({ field }) => (
+                <FormItem><FormLabel>{t("chapters.backgroundSound")}</FormLabel>
+                  <Select value={field.value || "_none"} onValueChange={field.onChange}>
+                    <FormControl><SelectTrigger><SelectValue placeholder={t("chapters.noBackgroundSound")} /></SelectTrigger></FormControl>
+                    <SelectContent>
+                      <SelectItem value="_none">{t("chapters.noBackgroundSound")}</SelectItem>
+                      {(soundEffects?.data ?? []).map((se) => <SelectItem key={se.id} value={se.id}>{se.name}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )} />
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={() => setChapterDialog(false)}>{t("common.cancel")}</Button>
                 <Button type="submit" loading={saveChapter.isPending}>{editingChapter ? t("common.save") : t("common.create")}</Button>
@@ -489,7 +507,6 @@ function BookDetailPage() {
                       <SelectContent>
                         <SelectItem value="exact">{t("chapters.exact")}</SelectItem>
                         <SelectItem value="contains">{t("chapters.contains")}</SelectItem>
-                        <SelectItem value="phonetic">{t("chapters.phonetic")}</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />

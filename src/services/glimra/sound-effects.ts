@@ -4,6 +4,8 @@ import type { Paginated, Single, SoundEffect } from "@/types/glimra";
 export interface SoundEffectFilters {
   search?: string;
   category?: string;
+  type?: string;
+  tag?: string;
   per_page?: number;
   page?: number;
 }
@@ -11,6 +13,10 @@ export interface SoundEffectFilters {
 export interface SoundEffectPayload {
   name: string;
   category_id?: string | null;
+  type?: string;
+  fade_in_ms?: number;
+  fade_out_ms?: number;
+  tags?: string[];
   duration_seconds?: number | null;
   is_active?: boolean;
   file?: File | null;
@@ -22,7 +28,9 @@ function toFormData(data: Partial<SoundEffectPayload>, method?: "PUT") {
   Object.entries(data).forEach(([key, value]) => {
     if (value === undefined || value === null) return;
     if (value instanceof File) fd.append(key, value);
-    else if (typeof value === "boolean") fd.append(key, value ? "1" : "0");
+    else if (Array.isArray(value)) {
+      value.forEach((v) => fd.append(`${key}[]`, String(v)));
+    } else if (typeof value === "boolean") fd.append(key, value ? "1" : "0");
     else fd.append(key, String(value));
   });
   return fd;

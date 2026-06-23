@@ -4,7 +4,7 @@ import type { Single, TriggerWord } from "@/types/glimra";
 export interface TriggerWordPayload {
   trigger_word: string;
   variants?: string[];
-  match_type?: "exact" | "contains" | "phonetic";
+  match_type?: "exact" | "contains";
   sound_effect_id?: string | null;
   volume?: number;
   delay_ms?: number;

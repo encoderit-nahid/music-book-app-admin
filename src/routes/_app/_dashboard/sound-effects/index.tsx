@@ -12,17 +12,12 @@ import { Badge } from "@/components/ui/badge";
 import AppTable from "@/components/app-table";
 import { PageHeader } from "@/components/glimra/page-header";
 import { ConfirmDelete } from "@/components/glimra/confirm-delete";
+import { TagInput } from "@/components/glimra/tag-input";
 import { soundEffectsService } from "@/services/glimra/sound-effects";
 import { categoriesService } from "@/services/glimra/categories";
+import { tagsService } from "@/services/glimra/tags";
 import type { SoundEffect } from "@/types/glimra";
 import type { ColumnDef } from "@tanstack/react-table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -38,6 +33,13 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { extractApiError } from "@/utils/error";
 import { Plus, Pencil, Trash2, Play, Square, Upload, Loader2 } from "lucide-react";
 
@@ -45,9 +47,16 @@ export const Route = createFileRoute("/_app/_dashboard/sound-effects/")({
   component: SoundEffectsPage,
 });
 
+const coerceInt = () =>
+  z.preprocess((v) => (v === "" || v == null ? 0 : Number(v)), z.number().int().min(0));
+
 const schema = z.object({
   name: z.string().min(1, "Name is required").max(255),
   category_id: z.string().optional(),
+  type: z.enum(["one-shot", "ambient-loop"]),
+  fade_in_ms: coerceInt(),
+  fade_out_ms: coerceInt(),
+  tags: z.array(z.string()).optional(),
   is_active: z.boolean(),
 });
 
@@ -57,7 +66,8 @@ function SoundEffectsPage() {
   const { t } = useTranslation();
   const qc = useQueryClient();
   const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("");
+  const [tagFilter, setTagFilter] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<SoundEffect | null>(null);
   const [toDelete, setToDelete] = useState<SoundEffect | null>(null);
@@ -71,9 +81,7 @@ function SoundEffectsPage() {
       audioRef.current = null;
       setPlayingUrl(null);
     } else {
-      if (audioRef.current) {
-        audioRef.current.pause();
-      }
+      if (audioRef.current) audioRef.current.pause();
       const audio = new Audio(url);
       audioRef.current = audio;
       audio.play()
@@ -92,48 +100,89 @@ function SoundEffectsPage() {
     }
   };
 
+  const { data: categoriesData } = useQuery({
+    queryKey: ["glimra", "categories", "all"],
+    queryFn: () => categoriesService.list({ per_page: 200 }),
+  });
+
+  const { data: tagsData } = useQuery({
+    queryKey: ["glimra", "tags", "sound-effects"],
+    queryFn: () => tagsService.list({ type: "sound-effects", per_page: 200 }),
+  });
+
   const { data, isLoading } = useQuery({
-    queryKey: ["glimra", "sound-effects", search, category],
-    queryFn: () => soundEffectsService.list({ search: search || undefined, category: category || undefined, per_page: 100 }),
-    // While any clip is still transcoding in the background, poll so the row
-    // flips from "Processing" to a playable file without a manual refresh.
+    queryKey: ["glimra", "sound-effects", search, categoryFilter, tagFilter],
+    queryFn: () =>
+      soundEffectsService.list({
+        search: search || undefined,
+        category: categoryFilter || undefined,
+        tag: tagFilter || undefined,
+        per_page: 100,
+      }),
     refetchInterval: (query) =>
       query.state.data?.data?.some((se) => se.status === "processing") ? 4000 : false,
   });
 
-  const { data: categories } = useQuery({
-    queryKey: ["glimra", "categories", "all"],
-    queryFn: () => categoriesService.list({ per_page: 100 }),
-  });
+  const categories = categoriesData?.data ?? [];
+  const allTags = tagsData?.data ?? [];
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(schema),
-    defaultValues: { name: "", category_id: "", is_active: true },
+    resolver: zodResolver(schema) as any,
+    defaultValues: {
+      name: "",
+      category_id: "_none",
+      type: "one-shot",
+      fade_in_ms: 0,
+      fade_out_ms: 0,
+      tags: [],
+      is_active: true,
+    },
   });
 
   const openCreate = () => {
     setEditing(null);
     setAudioFile(null);
-    form.reset({ name: "", category_id: "", is_active: true });
+    form.reset({
+      name: "",
+      category_id: "_none",
+      type: "one-shot",
+      fade_in_ms: 0,
+      fade_out_ms: 0,
+      tags: [],
+      is_active: true,
+    });
     setDialogOpen(true);
   };
 
   const openEdit = (se: SoundEffect) => {
     setEditing(se);
     setAudioFile(null);
-    form.reset({ name: se.name, category_id: se.category_id ?? "", is_active: se.is_active });
+    form.reset({
+      name: se.name,
+      category_id: se.category_id ?? "_none",
+      type: se.type ?? "one-shot",
+      fade_in_ms: se.fade_in_ms ?? 0,
+      fade_out_ms: se.fade_out_ms ?? 0,
+      tags: se.tags?.map((t) => t.name) ?? [],
+      is_active: se.is_active,
+    });
     setDialogOpen(true);
   };
 
   const save = useMutation({
     mutationFn: (values: FormValues) => {
       const payload = audioFile ? { ...values, file: audioFile } : values;
+      const normalized = {
+        ...payload,
+        category_id: payload.category_id === "_none" ? null : payload.category_id,
+      };
       return editing
-        ? soundEffectsService.update(editing.id, payload)
-        : soundEffectsService.create(payload);
+        ? soundEffectsService.update(editing.id, normalized)
+        : soundEffectsService.create(normalized);
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["glimra", "sound-effects"] });
+      qc.invalidateQueries({ queryKey: ["glimra", "tags"] });
       toast.success(editing ? t("soundEffects.updated") : t("soundEffects.created"));
       setDialogOpen(false);
     },
@@ -151,12 +200,51 @@ function SoundEffectsPage() {
   });
 
   const columns: ColumnDef<SoundEffect>[] = [
-    { accessorKey: "name", header: t("soundEffects.name"), cell: ({ row }) => <span className="font-medium">{row.original.name}</span> },
-    { accessorKey: "category", header: t("soundEffects.category"), cell: ({ row }) => row.original.category?.name ?? "—" },
+    {
+      accessorKey: "name",
+      header: t("soundEffects.name"),
+      cell: ({ row }) => <span className="font-medium">{row.original.name}</span>,
+    },
+    {
+      accessorKey: "category",
+      header: t("soundEffects.category"),
+      cell: ({ row }) => row.original.category?.name ?? "—",
+    },
+    {
+      accessorKey: "tags",
+      header: t("soundEffects.tags"),
+      cell: ({ row }) => {
+        const tags = row.original.tags;
+        if (!tags || tags.length === 0) return <span className="text-muted-foreground text-sm">—</span>;
+        return (
+          <div className="flex flex-wrap gap-1">
+            {tags.slice(0, 3).map((tag) => (
+              <Badge key={tag.id} variant="secondary" className="text-xs">
+                {tag.name}
+              </Badge>
+            ))}
+            {tags.length > 3 && (
+              <Badge variant="outline" className="text-xs">
+                +{tags.length - 3}
+              </Badge>
+            )}
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "type",
+      header: t("soundEffects.type"),
+      cell: ({ row }) => (
+        <Badge variant={row.original.type === "ambient-loop" ? "secondary" : "default"}>
+          {row.original.type === "ambient-loop" ? t("soundEffects.ambientLoop") : t("soundEffects.oneShot")}
+        </Badge>
+      ),
+    },
     {
       accessorKey: "duration_seconds",
       header: t("soundEffects.duration"),
-      cell: ({ row }) => row.original.duration_seconds ? `${row.original.duration_seconds}s` : "—",
+      cell: ({ row }) => (row.original.duration_seconds ? `${row.original.duration_seconds}s` : "—"),
     },
     {
       accessorKey: "file_url",
@@ -217,21 +305,37 @@ function SoundEffectsPage() {
         }
       />
 
-      <div className="mb-4 flex flex-wrap items-center gap-3">
-        <Input
-          className="max-w-xs"
-          placeholder={t("soundEffects.searchPlaceholder")}
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-        <Select value={category || "all"} onValueChange={(v) => setCategory(v === "all" ? "" : v)}>
-          <SelectTrigger className="w-48">
-            <SelectValue placeholder={t("books.allCategories")} />
+      <div className="mb-4 flex flex-wrap gap-3">
+        <div className="w-full max-w-xs">
+          <Input
+            placeholder={t("soundEffects.searchPlaceholder")}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+        <Select value={categoryFilter} onValueChange={(v) => setCategoryFilter(v === "_all" ? "" : v)}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder={t("soundEffects.allCategories")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">{t("books.allCategories")}</SelectItem>
-            {(categories?.data ?? []).map((c) => (
-              <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+            <SelectItem value="_all">{t("common.all")}</SelectItem>
+            {categories.map((cat) => (
+              <SelectItem key={cat.id} value={cat.id}>
+                {cat.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select value={tagFilter} onValueChange={(v) => setTagFilter(v === "_all" ? "" : v)}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder={t("soundEffects.allTags")} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="_all">{t("common.all")}</SelectItem>
+            {allTags.map((tag) => (
+              <SelectItem key={tag.id} value={tag.id}>
+                {tag.name}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -244,7 +348,7 @@ function SoundEffectsPage() {
       />
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent key={editing?.id ?? "new"}>
+        <DialogContent key={editing?.id ?? "new"} className="max-w-lg">
           <DialogHeader>
             <DialogTitle>{editing ? t("soundEffects.editSoundEffect") : t("soundEffects.newSoundEffect")}</DialogTitle>
           </DialogHeader>
@@ -256,7 +360,9 @@ function SoundEffectsPage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>{t("soundEffects.name")}</FormLabel>
-                    <FormControl><Input {...field} /></FormControl>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -267,17 +373,90 @@ function SoundEffectsPage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>{t("soundEffects.category")}</FormLabel>
-                    <Select value={field.value || "none"} onValueChange={(v) => field.onChange(v === "none" ? "" : v)}>
-                      <FormControl><SelectTrigger className="w-full"><SelectValue placeholder={t("common.select")} /></SelectTrigger></FormControl>
+                    <Select
+                      value={field.value || "_none"}
+                      onValueChange={field.onChange}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder={t("soundEffects.selectCategory")} />
+                        </SelectTrigger>
+                      </FormControl>
                       <SelectContent>
-                        <SelectItem value="none">—</SelectItem>
-                        {(categories?.data ?? []).map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                        <SelectItem value="_none">{t("soundEffects.noCategory")}</SelectItem>
+                        {categories.map((cat) => (
+                          <SelectItem key={cat.id} value={cat.id}>
+                            {cat.name}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+              <FormField
+                control={form.control}
+                name="tags"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("soundEffects.tags")}</FormLabel>
+                    <FormControl>
+                      <TagInput value={field.value ?? []} onChange={field.onChange} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="grid grid-cols-3 gap-3">
+                <FormField
+                  control={form.control}
+                  name="type"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("soundEffects.type")}</FormLabel>
+                      <Select value={field.value} onValueChange={field.onChange}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="one-shot">{t("soundEffects.oneShot")}</SelectItem>
+                          <SelectItem value="ambient-loop">{t("soundEffects.ambientLoop")}</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="fade_in_ms"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("soundEffects.fadeInMs")}</FormLabel>
+                      <FormControl>
+                        <Input type="number" min={0} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="fade_out_ms"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t("soundEffects.fadeOutMs")}</FormLabel>
+                      <FormControl>
+                        <Input type="number" min={0} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
               <FormItem>
                 <FormLabel>{t("soundEffects.file")}</FormLabel>
                 <FormControl>
@@ -292,13 +471,20 @@ function SoundEffectsPage() {
                         onChange={(e) => setAudioFile(e.target.files?.[0] ?? null)}
                       />
                     </label>
-                    {audioFile && (
-                      <p className="text-xs text-muted-foreground">{audioFile.name}</p>
-                    )}
+                    {audioFile && <p className="text-xs text-muted-foreground">{audioFile.name}</p>}
                     {!audioFile && editing?.file_url && (
                       <div className="flex items-center gap-2">
-                        <Button type="button" variant="ghost" size="sm" onClick={() => togglePlay(editing.file_url!)}>
-                          {playingUrl === editing.file_url ? <Square className="size-3" /> : <Play className="size-3" />}
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => togglePlay(editing.file_url!)}
+                        >
+                          {playingUrl === editing.file_url ? (
+                            <Square className="size-3" />
+                          ) : (
+                            <Play className="size-3" />
+                          )}
                           {playingUrl === editing.file_url ? t("common.stop") : t("common.play")}
                         </Button>
                         <span className="text-xs text-muted-foreground">{t("soundEffects.noFile")}</span>
