@@ -119,7 +119,7 @@
     "noImage": "Ingen bild"
   },
   "books": {
-    "title": "Böcker",
+    "title": "Titel",
     "description": "Hantera ditt bibliotek med interaktiva böcker.",
     "searchPlaceholder": "Sök böcker…",
     "allCategories": "Alla kategorier",
@@ -128,7 +128,6 @@
     "selectCategories": "Välj kategorier…",
     "newBook": "Ny bok",
     "editBook": "Redigera bok",
-    "title": "Titel",
     "author": "Författare",
     "category": "Kategori",
     "ageGroup": "Åldersgrupp",
@@ -183,7 +182,6 @@
     "deleted": "Kapitel borttaget",
     "saved": "Triggerord sparade",
     "editTrigger": "Redigera triggerord",
-    "addTrigger": "Lägg till triggerord",
     "saveError": "Kunde inte spara triggerord",
     "deleteTriggerTitle": "Ta bort triggerord?",
     "deleteTriggerDescription": "\"{{name}}\" kommer att tas bort.",
@@ -227,6 +225,36 @@
     "ambientLoop": "Bakgrundsljud",
     "fadeInMs": "Ton in (ms)",
     "fadeOutMs": "Ton ut (ms)"
+  },
+  "backgroundMusic": {
+    "title": "Bakgrundsmusik",
+    "empty": "Ingen bakgrundsmusik uppladdad ännu.",
+    "name": "Namn",
+    "volume": "Volym",
+    "chapters": "Spela i kapitel",
+    "selectChapters": "Välj kapitel",
+    "file": "Ljudfil",
+    "uploadFile": "Ladda upp ljudfil",
+    "replaceFile": "Ersätt ljudfil",
+    "keepFile": "Behåller nuvarande fil",
+    "addTrack": "Lägg till musik",
+    "editTrack": "Redigera musik",
+    "created": "Bakgrundsmusik tillagd",
+    "updated": "Bakgrundsmusik uppdaterad",
+    "deleted": "Bakgrundsmusik borttagen",
+    "saveError": "Kunde inte spara bakgrundsmusik",
+    "deleteError": "Kunde inte ta bort bakgrundsmusik",
+    "playError": "Kunde inte spela upp ljud",
+    "fileRequired": "Välj en ljudfil",
+    "chaptersCount_one": "{{count}} kapitel",
+    "chaptersCount_other": "{{count}} kapitel",
+    "deleteTitle": "Ta bort bakgrundsmusik?",
+    "deleteDescription": "\"{{name}}\" tas bort permanent.",
+    "status": {
+      "processing": "Bearbetar…",
+      "ready": "Klar",
+      "failed": "Misslyckades"
+    }
   },
   "appUsers": {
     "title": "Användare",
