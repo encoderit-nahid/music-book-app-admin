@@ -52,4 +52,23 @@ export const backgroundMusicService = {
   remove: async (bookId: string, id: string) => {
     await api.delete(`/admin/books/${bookId}/background-musics/${id}`);
   },
+
+  /** Upload a new track straight into the shared library. */
+  libraryCreate: async (data: Partial<BackgroundMusicPayload>) => {
+    const res = await api.post<Single<BackgroundMusic>>(`/admin/background-musics`, toFormData(data), {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return res.data;
+  },
+  /** Update a library track's details (no chapter assignment). */
+  libraryUpdate: async (id: string, data: Partial<BackgroundMusicPayload>) => {
+    const res = await api.post<Single<BackgroundMusic>>(`/admin/background-musics/${id}`, toFormData(data, "PUT"), {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return res.data;
+  },
+  /** Delete a track from the library entirely (releases all chapters). */
+  libraryRemove: async (id: string) => {
+    await api.delete(`/admin/background-musics/${id}`);
+  },
 };

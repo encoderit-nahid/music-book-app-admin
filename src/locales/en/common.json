@@ -9,6 +9,7 @@
     "categories": "Categories",
     "books": "Books",
     "soundEffects": "Sound Effects",
+    "backgroundMusic": "Background Music",
     "appUsers": "Users",
     "settings": "Settings",
     "staff": "Staff"
@@ -260,7 +261,17 @@
       "processing": "Processing…",
       "ready": "Ready",
       "failed": "Failed"
-    }
+    },
+    "moduleTitle": "Background Music",
+    "moduleDescription": "Upload and manage background music used across books and chapters.",
+    "searchPlaceholder": "Search background music…",
+    "newTrack": "New track",
+    "bookCount": "Books",
+    "chapterCount": "Chapters",
+    "duration": "Duration",
+    "deleted": "Background music deleted",
+    "deleteTitle": "Delete background music?",
+    "deleteDescription": "\"{{name}}\" will be permanently deleted and removed from every chapter that uses it."
   },
   "appUsers": {
     "title": "App Users",

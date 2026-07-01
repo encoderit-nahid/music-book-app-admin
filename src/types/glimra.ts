@@ -92,6 +92,8 @@ export interface BackgroundMusic {
   status: "processing" | "ready" | "failed";
   sort_order: number;
   chapter_ids?: string[];
+  chapters_count?: number;
+  books_count?: number;
   created_at?: string;
   updated_at?: string;
 }

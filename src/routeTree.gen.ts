@@ -22,6 +22,7 @@ import { Route as AppDashboardSettingsIndexRouteImport } from './routes/_app/_da
 import { Route as AppDashboardHomeSlidesIndexRouteImport } from './routes/_app/_dashboard/home-slides/index'
 import { Route as AppDashboardCategoriesIndexRouteImport } from './routes/_app/_dashboard/categories/index'
 import { Route as AppDashboardBooksIndexRouteImport } from './routes/_app/_dashboard/books/index'
+import { Route as AppDashboardBackgroundMusicIndexRouteImport } from './routes/_app/_dashboard/background-music/index'
 import { Route as AppDashboardAppUsersIndexRouteImport } from './routes/_app/_dashboard/app-users/index'
 import { Route as AppDashboardBooksBookIdIndexRouteImport } from './routes/_app/_dashboard/books/$bookId/index'
 
@@ -92,6 +93,12 @@ const AppDashboardBooksIndexRoute = AppDashboardBooksIndexRouteImport.update({
   path: '/books/',
   getParentRoute: () => AppRouteRoute,
 } as any)
+const AppDashboardBackgroundMusicIndexRoute =
+  AppDashboardBackgroundMusicIndexRouteImport.update({
+    id: '/_dashboard/background-music/',
+    path: '/background-music/',
+    getParentRoute: () => AppRouteRoute,
+  } as any)
 const AppDashboardAppUsersIndexRoute =
   AppDashboardAppUsersIndexRouteImport.update({
     id: '/_dashboard/app-users/',
@@ -112,6 +119,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof AuthLoginIndexRoute
   '/reset-password': typeof AuthResetPasswordIndexRoute
   '/app-users': typeof AppDashboardAppUsersIndexRoute
+  '/background-music': typeof AppDashboardBackgroundMusicIndexRoute
   '/books': typeof AppDashboardBooksIndexRoute
   '/categories': typeof AppDashboardCategoriesIndexRoute
   '/home-slides': typeof AppDashboardHomeSlidesIndexRoute
@@ -127,6 +135,7 @@ export interface FileRoutesByTo {
   '/login': typeof AuthLoginIndexRoute
   '/reset-password': typeof AuthResetPasswordIndexRoute
   '/app-users': typeof AppDashboardAppUsersIndexRoute
+  '/background-music': typeof AppDashboardBackgroundMusicIndexRoute
   '/books': typeof AppDashboardBooksIndexRoute
   '/categories': typeof AppDashboardCategoriesIndexRoute
   '/home-slides': typeof AppDashboardHomeSlidesIndexRoute
@@ -145,6 +154,7 @@ export interface FileRoutesById {
   '/_auth/login/': typeof AuthLoginIndexRoute
   '/_auth/reset-password/': typeof AuthResetPasswordIndexRoute
   '/_app/_dashboard/app-users/': typeof AppDashboardAppUsersIndexRoute
+  '/_app/_dashboard/background-music/': typeof AppDashboardBackgroundMusicIndexRoute
   '/_app/_dashboard/books/': typeof AppDashboardBooksIndexRoute
   '/_app/_dashboard/categories/': typeof AppDashboardCategoriesIndexRoute
   '/_app/_dashboard/home-slides/': typeof AppDashboardHomeSlidesIndexRoute
@@ -162,6 +172,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/reset-password'
     | '/app-users'
+    | '/background-music'
     | '/books'
     | '/categories'
     | '/home-slides'
@@ -177,6 +188,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/reset-password'
     | '/app-users'
+    | '/background-music'
     | '/books'
     | '/categories'
     | '/home-slides'
@@ -194,6 +206,7 @@ export interface FileRouteTypes {
     | '/_auth/login/'
     | '/_auth/reset-password/'
     | '/_app/_dashboard/app-users/'
+    | '/_app/_dashboard/background-music/'
     | '/_app/_dashboard/books/'
     | '/_app/_dashboard/categories/'
     | '/_app/_dashboard/home-slides/'
@@ -302,6 +315,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppDashboardBooksIndexRouteImport
       parentRoute: typeof AppRouteRoute
     }
+    '/_app/_dashboard/background-music/': {
+      id: '/_app/_dashboard/background-music/'
+      path: '/background-music'
+      fullPath: '/background-music'
+      preLoaderRoute: typeof AppDashboardBackgroundMusicIndexRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
     '/_app/_dashboard/app-users/': {
       id: '/_app/_dashboard/app-users/'
       path: '/app-users'
@@ -322,6 +342,7 @@ declare module '@tanstack/react-router' {
 interface AppRouteRouteChildren {
   AppDashboardIndexRoute: typeof AppDashboardIndexRoute
   AppDashboardAppUsersIndexRoute: typeof AppDashboardAppUsersIndexRoute
+  AppDashboardBackgroundMusicIndexRoute: typeof AppDashboardBackgroundMusicIndexRoute
   AppDashboardBooksIndexRoute: typeof AppDashboardBooksIndexRoute
   AppDashboardCategoriesIndexRoute: typeof AppDashboardCategoriesIndexRoute
   AppDashboardHomeSlidesIndexRoute: typeof AppDashboardHomeSlidesIndexRoute
@@ -334,6 +355,7 @@ interface AppRouteRouteChildren {
 const AppRouteRouteChildren: AppRouteRouteChildren = {
   AppDashboardIndexRoute: AppDashboardIndexRoute,
   AppDashboardAppUsersIndexRoute: AppDashboardAppUsersIndexRoute,
+  AppDashboardBackgroundMusicIndexRoute: AppDashboardBackgroundMusicIndexRoute,
   AppDashboardBooksIndexRoute: AppDashboardBooksIndexRoute,
   AppDashboardCategoriesIndexRoute: AppDashboardCategoriesIndexRoute,
   AppDashboardHomeSlidesIndexRoute: AppDashboardHomeSlidesIndexRoute,

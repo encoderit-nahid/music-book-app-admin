@@ -9,6 +9,7 @@
     "categories": "Kategorier",
     "books": "Böcker",
     "soundEffects": "Ljudeffekter",
+    "backgroundMusic": "Bakgrundsmusik",
     "appUsers": "Användare",
     "settings": "Inställningar",
     "staff": "Personal"
@@ -260,7 +261,17 @@
       "processing": "Bearbetar…",
       "ready": "Klar",
       "failed": "Misslyckades"
-    }
+    },
+    "moduleTitle": "Bakgrundsmusik",
+    "moduleDescription": "Ladda upp och hantera bakgrundsmusik som används i böcker och kapitel.",
+    "searchPlaceholder": "Sök bakgrundsmusik…",
+    "newTrack": "Ny låt",
+    "bookCount": "Böcker",
+    "chapterCount": "Kapitel",
+    "duration": "Längd",
+    "deleted": "Bakgrundsmusik borttagen",
+    "deleteTitle": "Ta bort bakgrundsmusik?",
+    "deleteDescription": "\"{{name}}\" tas bort permanent och kopplas bort från alla kapitel som använder den."
   },
   "appUsers": {
     "title": "Användare",

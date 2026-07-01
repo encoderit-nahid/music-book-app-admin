@@ -19,6 +19,7 @@ import {
   LayoutDashboard,
   BookOpen,
   Headphones,
+  Music,
   Users,
   Settings,
   Shield,
@@ -81,6 +82,13 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
       url: "/sound-effects",
       icon: Headphones,
       isActive: isActiveLink(["/sound-effects"]),
+      isVisible: true,
+    },
+    {
+      name: t("nav.backgroundMusic"),
+      url: "/background-music",
+      icon: Music,
+      isActive: isActiveLink(["/background-music"]),
       isVisible: true,
     },
     {
