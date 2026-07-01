@@ -74,10 +74,15 @@ export function BackgroundMusicDialog({ book, open, onOpenChange }: Props) {
     enabled: !!bookId && open,
   });
 
-  const chapterOptions: Option[] = (chapters?.data ?? []).map((c) => ({
-    value: c.id,
-    label: `#${c.chapter_number} · ${c.title}`,
-  }));
+  // Hide chapters already claimed by another track — a chapter can only carry
+  // one background music. Chapters assigned to the track being edited stay
+  // visible so they can be deselected.
+  const chapterOptions: Option[] = (chapters?.data ?? [])
+    .filter((c) => !c.background_music_id || c.background_music_id === editing?.id)
+    .map((c) => ({
+      value: c.id,
+      label: `#${c.chapter_number} · ${c.title}`,
+    }));
 
   const resetForm = () => {
     setEditing(null);
