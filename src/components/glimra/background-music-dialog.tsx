@@ -332,33 +332,35 @@ export function BackgroundMusicDialog({ book, open, onOpenChange }: Props) {
                   )} />
                 )}
 
-                <FormField control={form.control} name="volume" render={({ field }) => (
-                  <FormItem className="w-32">
-                    <FormLabel>{t("backgroundMusic.volume")} %</FormLabel>
-                    <FormControl><Input type="number" min={0} max={100} {...field} /></FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )} />
+                <div className="flex items-start gap-4">
+                  <FormField control={form.control} name="chapter_ids" render={({ field }) => {
+                    const selected = chapterOptions.filter((o) => (field.value ?? []).includes(o.value));
+                    return (
+                      <FormItem className="flex-1">
+                        <FormLabel>{t("backgroundMusic.chapters")}</FormLabel>
+                        <FormControl>
+                          <MultipleSelector
+                            value={selected}
+                            options={chapterOptions}
+                            onChange={(opts) => field.onChange(opts.map((o) => o.value))}
+                            placeholder={t("backgroundMusic.selectChapters")}
+                            hidePlaceholderWhenSelected
+                            emptyIndicator={<p className="text-center text-sm text-muted-foreground">{t("common.noResults")}</p>}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    );
+                  }} />
 
-                <FormField control={form.control} name="chapter_ids" render={({ field }) => {
-                  const selected = chapterOptions.filter((o) => (field.value ?? []).includes(o.value));
-                  return (
-                    <FormItem>
-                      <FormLabel>{t("backgroundMusic.chapters")}</FormLabel>
-                      <FormControl>
-                        <MultipleSelector
-                          value={selected}
-                          options={chapterOptions}
-                          onChange={(opts) => field.onChange(opts.map((o) => o.value))}
-                          placeholder={t("backgroundMusic.selectChapters")}
-                          hidePlaceholderWhenSelected
-                          emptyIndicator={<p className="text-center text-sm text-muted-foreground">{t("common.noResults")}</p>}
-                        />
-                      </FormControl>
+                  <FormField control={form.control} name="volume" render={({ field }) => (
+                    <FormItem className="w-28">
+                      <FormLabel>{t("backgroundMusic.volume")} %</FormLabel>
+                      <FormControl><Input type="number" min={0} max={100} {...field} /></FormControl>
                       <FormMessage />
                     </FormItem>
-                  );
-                }} />
+                  )} />
+                </div>
 
                 {/* File (upload new, or replace while editing) */}
                 {(editing || source === "upload") && (
