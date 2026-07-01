@@ -75,10 +75,24 @@ export interface Chapter {
   chapter_number: number;
   sort_order: number;
   content?: string | null;
-  background_sound_id?: string | null;
-  background_sound?: SoundEffect | null;
+  background_music_id?: string | null;
+  background_music?: BackgroundMusic | null;
   trigger_word_mappings?: TriggerWord[];
   triggers_count?: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface BackgroundMusic {
+  id: string;
+  book_id: string;
+  name: string;
+  file_url: string | null;
+  duration_seconds: number | null;
+  volume: number;
+  status: "processing" | "ready" | "failed";
+  sort_order: number;
+  chapter_ids?: string[];
   created_at?: string;
   updated_at?: string;
 }
