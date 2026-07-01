@@ -40,8 +40,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import MultipleSelector, { type Option } from "@/components/ui/multiselect";
+import { BackgroundMusicDialog } from "@/components/glimra/background-music-dialog";
 import { extractApiError } from "@/utils/error";
-import { Plus, BookOpen, Pencil, Trash2, Eye, Image as ImageIcon } from "lucide-react";
+import { Plus, BookOpen, Pencil, Trash2, Eye, Image as ImageIcon, Music } from "lucide-react";
 
 export const Route = createFileRoute("/_app/_dashboard/books/")({
   component: BooksPage,
@@ -73,6 +74,7 @@ function BooksPage() {
   const [editing, setEditing] = useState<Book | null>(null);
   const [toDelete, setToDelete] = useState<Book | null>(null);
   const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [musicBook, setMusicBook] = useState<Book | null>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ["glimra", "books", search, author, category, status, page],
@@ -186,6 +188,9 @@ function BooksPage() {
           <Link to="/books/$bookId" params={{ bookId: row.original.id }}>
             <Button variant="ghost" size="icon"><Eye className="size-4" /></Button>
           </Link>
+          <Button variant="ghost" size="icon" title={t("backgroundMusic.title")} onClick={() => setMusicBook(row.original)}>
+            <Music className="size-4" />
+          </Button>
           <Button variant="ghost" size="icon" onClick={() => openEdit(row.original)}>
             <Pencil className="size-4" />
           </Button>
@@ -394,6 +399,12 @@ function BooksPage() {
           </Form>
         </DialogContent>
       </Dialog>
+
+      <BackgroundMusicDialog
+        book={musicBook}
+        open={!!musicBook}
+        onOpenChange={(o) => !o && setMusicBook(null)}
+      />
 
       <ConfirmDelete
         open={!!toDelete}

@@ -119,7 +119,7 @@
     "noImage": "No image"
   },
   "books": {
-    "title": "Books",
+    "title": "Title",
     "description": "Manage your library of interactive storybooks.",
     "searchPlaceholder": "Search books…",
     "allCategories": "All categories",
@@ -128,7 +128,6 @@
     "selectCategories": "Select categories…",
     "newBook": "New book",
     "editBook": "Edit book",
-    "title": "Title",
     "author": "Author",
     "category": "Category",
     "ageGroup": "Age Group",
@@ -183,7 +182,6 @@
     "deleted": "Chapter deleted",
     "saved": "Trigger words saved",
     "editTrigger": "Edit trigger word",
-    "addTrigger": "Add trigger word",
     "saveError": "Could not save trigger word",
     "deleteTriggerTitle": "Delete trigger word?",
     "deleteTriggerDescription": "\"{{name}}\" will be removed.",
@@ -227,6 +225,36 @@
     "ambientLoop": "Ambient loop",
     "fadeInMs": "Fade in (ms)",
     "fadeOutMs": "Fade out (ms)"
+  },
+  "backgroundMusic": {
+    "title": "Background Music",
+    "empty": "No background music uploaded yet.",
+    "name": "Name",
+    "volume": "Volume",
+    "chapters": "Play on chapters",
+    "selectChapters": "Select chapters",
+    "file": "Audio file",
+    "uploadFile": "Upload audio file",
+    "replaceFile": "Replace audio file",
+    "keepFile": "Keeping current file",
+    "addTrack": "Add music",
+    "editTrack": "Edit music",
+    "created": "Background music added",
+    "updated": "Background music updated",
+    "deleted": "Background music deleted",
+    "saveError": "Could not save background music",
+    "deleteError": "Could not delete background music",
+    "playError": "Could not play audio",
+    "fileRequired": "Please choose an audio file",
+    "chaptersCount_one": "{{count}} chapter",
+    "chaptersCount_other": "{{count}} chapters",
+    "deleteTitle": "Delete background music?",
+    "deleteDescription": "\"{{name}}\" will be permanently deleted.",
+    "status": {
+      "processing": "Processing…",
+      "ready": "Ready",
+      "failed": "Failed"
+    }
   },
   "appUsers": {
     "title": "App Users",
