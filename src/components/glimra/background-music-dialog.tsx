@@ -24,6 +24,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import MultipleSelector, { type Option } from "@/components/ui/multiselect";
+import { SearchableSelect } from "@/components/shared/searchable-select";
 import { ConfirmDelete } from "@/components/glimra/confirm-delete";
 import { backgroundMusicService } from "@/services/glimra/background-music";
 import { chaptersService } from "@/services/glimra/chapters";
@@ -37,6 +38,7 @@ const schema = z.object({
 });
 
 type FormValues = z.infer<typeof schema>;
+type Source = "existing" | "upload";
 
 interface Props {
   book: Book | null;
@@ -51,6 +53,8 @@ export function BackgroundMusicDialog({ book, open, onOpenChange }: Props) {
 
   const [editing, setEditing] = useState<BackgroundMusic | null>(null);
   const [toDelete, setToDelete] = useState<BackgroundMusic | null>(null);
+  const [source, setSource] = useState<Source>("existing");
+  const [existingId, setExistingId] = useState<string>("");
   const [file, setFile] = useState<File | null>(null);
   const [playingUrl, setPlayingUrl] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -68,24 +72,36 @@ export function BackgroundMusicDialog({ book, open, onOpenChange }: Props) {
       query.state.data?.data?.some((m) => m.status === "processing") ? 4000 : false,
   });
 
+  const { data: libraryData } = useQuery({
+    queryKey: ["glimra", "background-music", "library"],
+    queryFn: () => backgroundMusicService.library(),
+    enabled: open,
+  });
+
   const { data: chapters } = useQuery({
     queryKey: ["glimra", "chapters", bookId],
     queryFn: () => chaptersService.listByBook(bookId),
     enabled: !!bookId && open,
   });
 
-  // Hide chapters already claimed by another track — a chapter can only carry
-  // one background music. Chapters assigned to the track being edited stay
-  // visible so they can be deselected.
+  // The track currently being assigned — used to keep its own chapters visible.
+  const currentTrackId = editing?.id ?? (source === "existing" ? existingId : "");
+
+  // Hide chapters already claimed by another track in this book.
   const chapterOptions: Option[] = (chapters?.data ?? [])
-    .filter((c) => !c.background_music_id || c.background_music_id === editing?.id)
-    .map((c) => ({
-      value: c.id,
-      label: `#${c.chapter_number} · ${c.title}`,
-    }));
+    .filter((c) => !c.background_music_id || c.background_music_id === currentTrackId)
+    .map((c) => ({ value: c.id, label: `#${c.chapter_number} · ${c.title}` }));
+
+  // Library tracks not already used in this book (those are edited in the list).
+  const usedIds = new Set((tracks?.data ?? []).map((tk) => tk.id));
+  const libraryOptions = (libraryData?.data ?? [])
+    .filter((tk) => !usedIds.has(tk.id))
+    .map((tk) => ({ value: tk.id, label: tk.name }));
 
   const resetForm = () => {
     setEditing(null);
+    setSource("existing");
+    setExistingId("");
     setFile(null);
     form.reset({ name: "", volume: 80, chapter_ids: [] });
   };
@@ -127,6 +143,7 @@ export function BackgroundMusicDialog({ book, open, onOpenChange }: Props) {
 
   const startEdit = (track: BackgroundMusic) => {
     setEditing(track);
+    setExistingId("");
     setFile(null);
     form.reset({
       name: track.name,
@@ -135,23 +152,46 @@ export function BackgroundMusicDialog({ book, open, onOpenChange }: Props) {
     });
   };
 
+  const pickExisting = (id: string) => {
+    setExistingId(id);
+    const track = (libraryData?.data ?? []).find((tk) => tk.id === id);
+    form.reset({
+      name: track?.name ?? "",
+      volume: Math.round((track?.volume ?? 0.8) * 100),
+      chapter_ids: [],
+    });
+  };
+
   const invalidate = () => {
     qc.invalidateQueries({ queryKey: ["glimra", "background-music", bookId] });
+    qc.invalidateQueries({ queryKey: ["glimra", "background-music", "library"] });
     qc.invalidateQueries({ queryKey: ["glimra", "chapters", bookId] });
     qc.invalidateQueries({ queryKey: ["glimra", "book", bookId] });
   };
 
   const save = useMutation({
     mutationFn: (values: FormValues) => {
-      const payload = {
+      const volume = values.volume / 100;
+      if (editing) {
+        return backgroundMusicService.update(bookId, editing.id, {
+          name: values.name,
+          volume,
+          chapter_ids: values.chapter_ids,
+          file: file ?? undefined,
+        });
+      }
+      if (source === "existing") {
+        return backgroundMusicService.update(bookId, existingId, {
+          volume,
+          chapter_ids: values.chapter_ids,
+        });
+      }
+      return backgroundMusicService.create(bookId, {
         name: values.name,
-        volume: values.volume / 100,
+        volume,
         chapter_ids: values.chapter_ids,
         file: file ?? undefined,
-      };
-      return editing
-        ? backgroundMusicService.update(editing.id, payload)
-        : backgroundMusicService.create(bookId, payload);
+      });
     },
     onSuccess: () => {
       invalidate();
@@ -162,10 +202,10 @@ export function BackgroundMusicDialog({ book, open, onOpenChange }: Props) {
   });
 
   const remove = useMutation({
-    mutationFn: (id: string) => backgroundMusicService.remove(id),
+    mutationFn: (id: string) => backgroundMusicService.remove(bookId, id),
     onSuccess: () => {
       invalidate();
-      toast.success(t("backgroundMusic.deleted"));
+      toast.success(t("backgroundMusic.removed"));
       setToDelete(null);
       if (editing && toDelete && editing.id === toDelete.id) resetForm();
     },
@@ -173,7 +213,11 @@ export function BackgroundMusicDialog({ book, open, onOpenChange }: Props) {
   });
 
   const onSubmit = (values: FormValues) => {
-    if (!editing && !file) {
+    if (!editing && source === "existing" && !existingId) {
+      toast.error(t("backgroundMusic.selectExistingRequired"));
+      return;
+    }
+    if (!editing && source === "upload" && !file) {
       toast.error(t("backgroundMusic.fileRequired"));
       return;
     }
@@ -194,7 +238,7 @@ export function BackgroundMusicDialog({ book, open, onOpenChange }: Props) {
         </DialogHeader>
 
         <div className="space-y-4">
-          {/* Existing tracks */}
+          {/* Tracks used in this book */}
           <div className="space-y-2">
             {(tracks?.data ?? []).length === 0 ? (
               <p className="text-sm text-muted-foreground">{t("backgroundMusic.empty")}</p>
@@ -234,27 +278,67 @@ export function BackgroundMusicDialog({ book, open, onOpenChange }: Props) {
 
           {/* Add / edit form */}
           <div className="rounded-xl border p-4 bg-muted/20">
-            <h3 className="mb-3 text-sm font-semibold">
-              {editing ? t("backgroundMusic.editTrack") : t("backgroundMusic.addTrack")}
-            </h3>
+            <div className="mb-3 flex items-center justify-between">
+              <h3 className="text-sm font-semibold">
+                {editing ? t("backgroundMusic.editTrack") : t("backgroundMusic.addTrack")}
+              </h3>
+              {!editing && (
+                <div className="flex gap-1 rounded-md border p-0.5">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant={source === "existing" ? "default" : "ghost"}
+                    onClick={() => { setSource("existing"); setFile(null); }}
+                  >
+                    {t("backgroundMusic.selectExisting")}
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant={source === "upload" ? "default" : "ghost"}
+                    onClick={() => { setSource("upload"); setExistingId(""); }}
+                  >
+                    {t("backgroundMusic.uploadNew")}
+                  </Button>
+                </div>
+              )}
+            </div>
+
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <div className="flex gap-4">
+                {/* Source: pick an existing library track */}
+                {!editing && source === "existing" && (
+                  <FormItem>
+                    <FormLabel>{t("backgroundMusic.existingTrack")}</FormLabel>
+                    <SearchableSelect
+                      className="w-full"
+                      value={existingId}
+                      onChange={(v) => pickExisting(String(v))}
+                      placeholder={t("backgroundMusic.selectExistingPlaceholder")}
+                      emptyMessage={t("backgroundMusic.libraryEmpty")}
+                      options={libraryOptions}
+                    />
+                  </FormItem>
+                )}
+
+                {/* Name (upload new, or editing) */}
+                {(editing || source === "upload") && (
                   <FormField control={form.control} name="name" render={({ field }) => (
-                    <FormItem className="flex-1">
+                    <FormItem>
                       <FormLabel>{t("backgroundMusic.name")}</FormLabel>
                       <FormControl><Input {...field} /></FormControl>
                       <FormMessage />
                     </FormItem>
                   )} />
-                  <FormField control={form.control} name="volume" render={({ field }) => (
-                    <FormItem className="w-28">
-                      <FormLabel>{t("backgroundMusic.volume")} %</FormLabel>
-                      <FormControl><Input type="number" min={0} max={100} {...field} /></FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )} />
-                </div>
+                )}
+
+                <FormField control={form.control} name="volume" render={({ field }) => (
+                  <FormItem className="w-32">
+                    <FormLabel>{t("backgroundMusic.volume")} %</FormLabel>
+                    <FormControl><Input type="number" min={0} max={100} {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
 
                 <FormField control={form.control} name="chapter_ids" render={({ field }) => {
                   const selected = chapterOptions.filter((o) => (field.value ?? []).includes(o.value));
@@ -276,25 +360,28 @@ export function BackgroundMusicDialog({ book, open, onOpenChange }: Props) {
                   );
                 }} />
 
-                <FormItem>
-                  <FormLabel>{t("backgroundMusic.file")}</FormLabel>
-                  <FormControl>
-                    <div className="space-y-1">
-                      <label className="flex items-center gap-2 cursor-pointer text-sm text-muted-foreground hover:text-foreground">
-                        <FileAudio className="size-4" />
-                        <span>{editing ? t("backgroundMusic.replaceFile") : t("backgroundMusic.uploadFile")}</span>
-                        <input
-                          type="file"
-                          accept="audio/*"
-                          className="hidden"
-                          onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-                        />
-                      </label>
-                      {file && <p className="text-xs text-muted-foreground">{file.name}</p>}
-                      {!file && editing && <p className="text-xs text-muted-foreground">{t("backgroundMusic.keepFile")}</p>}
-                    </div>
-                  </FormControl>
-                </FormItem>
+                {/* File (upload new, or replace while editing) */}
+                {(editing || source === "upload") && (
+                  <FormItem>
+                    <FormLabel>{t("backgroundMusic.file")}</FormLabel>
+                    <FormControl>
+                      <div className="space-y-1">
+                        <label className="flex items-center gap-2 cursor-pointer text-sm text-muted-foreground hover:text-foreground">
+                          <FileAudio className="size-4" />
+                          <span>{editing ? t("backgroundMusic.replaceFile") : t("backgroundMusic.uploadFile")}</span>
+                          <input
+                            type="file"
+                            accept="audio/*"
+                            className="hidden"
+                            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+                          />
+                        </label>
+                        {file && <p className="text-xs text-muted-foreground">{file.name}</p>}
+                        {!file && editing && <p className="text-xs text-muted-foreground">{t("backgroundMusic.keepFile")}</p>}
+                      </div>
+                    </FormControl>
+                  </FormItem>
+                )}
 
                 <div className="flex justify-end gap-2">
                   {editing && (
@@ -315,8 +402,8 @@ export function BackgroundMusicDialog({ book, open, onOpenChange }: Props) {
       <ConfirmDelete
         open={!!toDelete}
         onOpenChange={(o) => !o && setToDelete(null)}
-        title={t("backgroundMusic.deleteTitle")}
-        description={t("backgroundMusic.deleteDescription", { name: toDelete?.name ?? "" })}
+        title={t("backgroundMusic.removeTitle")}
+        description={t("backgroundMusic.removeDescription", { name: toDelete?.name ?? "" })}
         loading={remove.isPending}
         onConfirm={() => toDelete && remove.mutate(toDelete.id)}
       />

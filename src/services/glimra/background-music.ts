@@ -24,23 +24,32 @@ function toFormData(data: Partial<BackgroundMusicPayload>, method?: "PUT") {
 }
 
 export const backgroundMusicService = {
+  /** Tracks used within a specific book (chapter_ids scoped to that book). */
   listByBook: async (bookId: string) => {
     const res = await api.get<{ data: BackgroundMusic[] }>(`/admin/books/${bookId}/background-musics`);
     return res.data;
   },
+  /** The full shared library, for picking an existing track. */
+  library: async () => {
+    const res = await api.get<{ data: BackgroundMusic[] }>(`/admin/background-musics`);
+    return res.data;
+  },
+  /** Upload a new track and assign it to the book's chapters. */
   create: async (bookId: string, data: Partial<BackgroundMusicPayload>) => {
     const res = await api.post<Single<BackgroundMusic>>(`/admin/books/${bookId}/background-musics`, toFormData(data), {
       headers: { "Content-Type": "multipart/form-data" },
     });
     return res.data;
   },
-  update: async (id: string, data: Partial<BackgroundMusicPayload>) => {
-    const res = await api.post<Single<BackgroundMusic>>(`/admin/background-musics/${id}`, toFormData(data, "PUT"), {
+  /** Update a track and/or (re)assign it within the book's chapters. */
+  update: async (bookId: string, id: string, data: Partial<BackgroundMusicPayload>) => {
+    const res = await api.post<Single<BackgroundMusic>>(`/admin/books/${bookId}/background-musics/${id}`, toFormData(data, "PUT"), {
       headers: { "Content-Type": "multipart/form-data" },
     });
     return res.data;
   },
-  remove: async (id: string) => {
-    await api.delete(`/admin/background-musics/${id}`);
+  /** Remove a track from this book (keeps it in the library). */
+  remove: async (bookId: string, id: string) => {
+    await api.delete(`/admin/books/${bookId}/background-musics/${id}`);
   },
 };
