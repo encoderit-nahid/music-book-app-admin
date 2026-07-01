@@ -85,7 +85,6 @@ export interface Chapter {
 
 export interface BackgroundMusic {
   id: string;
-  book_id: string;
   name: string;
   file_url: string | null;
   duration_seconds: number | null;
