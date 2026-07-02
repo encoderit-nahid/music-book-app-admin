@@ -15,6 +15,7 @@ function toFormData(data: Partial<HomeSlidePayload>, method?: "PUT") {
   Object.entries(data).forEach(([key, value]) => {
     if (value === undefined || value === null) return;
     if (value instanceof File) fd.append(key, value);
+    else if (typeof value === "boolean") fd.append(key, value ? "1" : "0");
     else fd.append(key, String(value));
   });
   return fd;
