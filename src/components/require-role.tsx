@@ -3,8 +3,10 @@ import { useNavigate } from '@tanstack/react-router'
 import { useCurrentUser } from '@/hooks/useCurrentUser'
 import Loading from '@/components/base/loading'
 
+type AdminRole = 'super-admin' | 'editor' | 'user'
+
 interface Props {
-  roles: ('admin' | 'inventory-manager' | 'barber')[]
+  roles: AdminRole[]
   children: ReactNode
 }
 
@@ -12,7 +14,7 @@ export function RequireRole({ roles, children }: Props) {
   const { data: user, isLoading, isFetching } = useCurrentUser()
   const navigate = useNavigate()
 
-  const userHasRole = !!user && roles.includes(user.role as 'admin' | 'inventory-manager' | 'barber')
+  const userHasRole = !!user && roles.includes(user.role as AdminRole)
 
   useEffect(() => {
     if (isLoading || isFetching) return
